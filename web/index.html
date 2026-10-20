@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Cuadrante de turnos y suplencias para equipos de enfermería. Los datos no salen del dispositivo. Instálalo en Android, iPhone u ordenador.">
+<title>MedBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root {
+  --cork: #c48a52;
+  --cork-soft: #f4e7d6;
+  --brand: #0a5650;
+  --brand-ink: #0a5650;
+  --brand-soft: #e2f3f0;
+  --paper: #fffdf6;
+  --salmon: #e8604f;
+  --salmon-soft: #fde5df;
+  --salmon-ink: #8c2d1c;
+  --m-bg: #e3effa;
+  --m-ink: #0b4a75;
+  --t-bg: #ece8fb;
+  --t-ink: #3d2f8f;
+  --ground: #f7f4ef;
+  --surface: #ffffff;
+  --sunken: #efeae1;
+  --ink: #241d16;
+  --muted: #6d6257;
+  --line: #e2dbd0;
+  --shadow: 0 1px 2px rgba(36,29,22,.06), 0 8px 24px -12px rgba(36,29,22,.18);
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cork: #d49a62;
+    --cork-soft: #3a2d20;
+    --brand: #5ec9b6;
+    --brand-ink: #9fe3d6;
+    --brand-soft: #16302c;
+    --paper: #241d16;
+    --salmon: #f0806f;
+    --salmon-soft: #3d201a;
+    --salmon-ink: #f6b4a7;
+    --m-bg: #17293a;
+    --m-ink: #a9d2f2;
+    --t-bg: #241f3d;
+    --t-ink: #c4b9f5;
+    --ground: #15110e;
+    --surface: #1e1915;
+    --sunken: #272019;
+    --ink: #f2ece3;
+    --muted: #a4988a;
+    --line: #342b23;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --cork: #d49a62;
+  --cork-soft: #3a2d20;
+  --brand: #5ec9b6;
+  --brand-ink: #9fe3d6;
+  --brand-soft: #16302c;
+  --paper: #241d16;
+  --salmon: #f0806f;
+  --salmon-soft: #3d201a;
+  --salmon-ink: #f6b4a7;
+  --m-bg: #17293a;
+  --m-ink: #a9d2f2;
+  --t-bg: #241f3d;
+  --t-ink: #c4b9f5;
+  --ground: #15110e;
+  --surface: #1e1915;
+  --sunken: #272019;
+  --ink: #f2ece3;
+  --muted: #a4988a;
+  --line: #342b23;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 16px/1.6 "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-inline: 20px;
+}
+img { max-width: 100%; }
+h1, h2, h3 {
+  font-family: "Bricolage Grotesque", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: clamp(2.1rem, 6.2vw, 3.5rem); }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2.1rem); }
+h3 { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: inherit; }
+
+.wrap { max-width: 1060px; margin-inline: auto; }
+.eyebrow {
+  font: 700 0.75rem/1 "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lede { font-size: clamp(1.05rem, 2.2vw, 1.2rem); color: var(--muted); max-width: 60ch; }
+
+/* ---------- barra ---------- */
+.topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  margin-inline: -20px;
+  padding-inline: 20px;
+}
+.topbar-in { display: flex; align-items: center; gap: 12px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 9px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em; }
+.pin { width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a7a, #c0392b 60%, #7b1d14); box-shadow: 0 2px 3px rgba(0,0,0,.35); flex: none; }
+.topbar nav { margin-left: auto; display: flex; gap: 4px; align-items: center; }
+.topbar nav a { font-size: .875rem; color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 9px; }
+.topbar nav a:hover { color: var(--ink); background: var(--sunken); }
+@media (max-width: 620px) { .topbar nav a.hide-s { display: none; } }
+
+/* ---------- botones ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 20px; border-radius: 12px;
+  font: 600 0.9375rem/1 "Public Sans", sans-serif; text-decoration: none;
+  border: 1px solid transparent; cursor: pointer; transition: transform .12s ease, background .12s ease;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--brand); color: var(--ground); }
+:root[data-theme="dark"] .btn-primary, :root:not([data-theme="light"]) .btn-primary { color: #0d201d; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .btn-primary { color: #fff; } }
+.btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--brand); }
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.btn[aria-disabled="true"]:active { transform: none; }
+
+/* ---------- héroe ---------- */
+.hero { display: grid; grid-template-columns: 1fr; gap: 36px; padding-block: 52px 56px; }
+@media (min-width: 900px) { .hero { grid-template-columns: minmax(0,1fr) minmax(0,1.08fr); gap: 48px; align-items: center; } }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.hero-note { margin-top: 14px; font-size: .875rem; color: var(--muted); }
+
+/* ---------- cuadrante ---------- */
+.board {
+  background: var(--cork-soft);
+  border: 1px solid color-mix(in srgb, var(--cork) 40%, transparent);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.board-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.board-head strong { font: 700 .8125rem/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.board-head span { font-size: .8125rem; color: var(--muted); margin-left: auto; }
+.grid-scroll { overflow-x: auto; }
+table.cuadrante { border-collapse: separate; border-spacing: 3px; width: 100%; }
+table.cuadrante th, table.cuadrante td { padding: 0; }
+table.cuadrante thead th {
+  font: 700 .6875rem/1.2 "JetBrains Mono", monospace; color: var(--muted); padding-bottom: 2px; font-variant-numeric: tabular-nums;
+}
+table.cuadrante tbody th {
+  text-align: left; font: 600 .8125rem/1 "Public Sans", sans-serif; padding-right: 8px; white-space: nowrap;
+}
+.cell {
+  width: 100%; min-width: 34px; height: 34px; border: 0; border-radius: 8px; cursor: pointer;
+  font: 700 .8125rem/1 "JetBrains Mono", monospace; color: var(--m-ink); background: var(--m-bg);
+  transition: transform .1s ease;
+}
+.cell:active { transform: scale(.88); }
+.cell:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.cell[data-code="T"] { background: var(--t-bg); color: var(--t-ink); }
+.cell[data-code="AUS"] { background: var(--salmon-soft); color: var(--salmon-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--salmon) 55%, transparent); font-size: .625rem; }
+tfoot th { text-align: left; font: 600 .75rem/1 "Public Sans", sans-serif; color: var(--muted); padding-right: 8px; white-space: nowrap; }
+.count {
+  height: 26px; border-radius: 7px; background: var(--sunken); color: var(--muted);
+  font: 700 .75rem/26px "JetBrains Mono", monospace; text-align: center; font-variant-numeric: tabular-nums;
+}
+.count.bad { background: var(--salmon); color: #fff; }
+.board-msg {
+  margin-top: 10px; min-height: 40px; display: flex; align-items: center; gap: 8px;
+  font-size: .8125rem; padding: 9px 11px; border-radius: 10px; background: var(--paper);
+  border: 1px solid var(--line); color: var(--muted);
+}
+.board-msg[data-tone="bad"] { background: var(--salmon-soft); border-color: color-mix(in srgb, var(--salmon) 45%, transparent); color: var(--salmon-ink); font-weight: 600; }
+.board-msg[data-tone="warn"] { background: var(--cork-soft); border-color: color-mix(in srgb, var(--cork) 45%, transparent); color: var(--ink); }
+
+/* ---------- secciones ---------- */
+section { padding-block: 56px; border-top: 1px solid var(--line); }
+.sec-head { margin-bottom: 30px; display: grid; gap: 10px; }
+.cards { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 680px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 7px; align-content: start; }
+.card p { color: var(--muted); font-size: .9375rem; }
+.card .tag { font: 700 .6875rem/1 "JetBrains Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--brand-ink); }
+
+.privacy { background: var(--brand-soft); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); border-radius: 18px; padding: clamp(22px, 4vw, 34px); display: grid; gap: 18px; }
+.facts { display: grid; gap: 12px; grid-template-columns: 1fr; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 680px) { .facts { grid-template-columns: repeat(2, 1fr); } }
+.facts li { display: grid; gap: 3px; }
+.facts b { font-size: .9375rem; }
+.facts span { font-size: .875rem; color: var(--muted); }
+
+/* ---------- instalar ---------- */
+.tabs { display: flex; gap: 6px; background: var(--sunken); padding: 5px; border-radius: 13px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
+.tab { border: 0; background: transparent; color: var(--muted); font: 600 .9375rem/1 "Public Sans", sans-serif; padding: 11px 16px; border-radius: 9px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.tab:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.panel { margin-top: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 3.5vw, 28px); }
+.panel-top { display: grid; gap: 6px; margin-bottom: 20px; }
+.steps { counter-reset: s; list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.steps li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; }
+.steps li::before {
+  counter-increment: s; content: counter(s);
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-ink);
+  font: 700 .8125rem/1 "JetBrains Mono", monospace;
+}
+.steps p { font-size: .9375rem; }
+.steps small { display: block; color: var(--muted); font-size: .8125rem; margin-top: 3px; }
+.req { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; }
+
+.limits { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.limits li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; font-size: .9375rem; }
+.limits span[aria-hidden] { font: 700 1rem/1.4 "JetBrains Mono", monospace; color: var(--salmon); }
+.limits b { font-weight: 600; }
+.limits p { color: var(--muted); font-size: .875rem; }
+
+footer { border-top: 1px solid var(--line); padding-block: 36px 48px; display: grid; gap: 16px; font-size: .875rem; color: var(--muted); }
+.foot-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+footer a { color: var(--brand-ink); text-decoration-color: color-mix(in srgb, var(--brand) 45%, transparent); text-underline-offset: 3px; }
+.pending { font-size: .8125rem; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <span class="brand"><span class="pin" aria-hidden="true"></span>MedBoard</span>
+    <nav aria-label="Secciones">
+      <a href="#que-hace" class="hide-s">Qué hace</a>
+      <a href="#privacidad" class="hide-s">Privacidad</a>
+      <a href="#instalar">Instalar</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Cuadrantes de enfermería</p>
+      <h1 style="margin-top:14px">El cuadrante que no te deja quedarte corta de personal.</h1>
+      <p class="lede" style="margin-top:18px">
+        Monta el cuadrante del mes, detecta la falta, encuentra quién la cubre y escribe el WhatsApp por ti.
+        Todo desde el móvil y <strong style="color:var(--ink)">sin que los datos salgan del dispositivo</strong>.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" id="cta-demo" href="#instalar">Probar en el navegador</a>
+        <a class="btn btn-ghost" href="#instalar">Instalar en el móvil</a>
+      </div>
+      <p class="hero-note">Gratis y sin cuenta. Funciona sin conexión.</p>
+    </div>
+
+    <div class="board">
+      <div class="board-head">
+        <strong>Octubre</strong>
+        <span>Toca una casilla</span>
+      </div>
+      <div class="grid-scroll">
+        <table class="cuadrante" id="demo-grid">
+          <caption class="eyebrow" style="text-align:left;padding-bottom:8px">Cuadrante de ejemplo · mínimo 3 por la mañana</caption>
+          <thead><tr id="grid-head"><th scope="col"><span class="eyebrow">Equipo</span></th></tr></thead>
+          <tbody id="grid-body"></tbody>
+          <tfoot><tr id="grid-foot"><th scope="row">Mañana</th></tr></tfoot>
+        </table>
+      </div>
+      <p class="board-msg" id="board-msg" role="status">Mañana: M · Tarde: T · Falta: toca otra vez.</p>
+    </div>
+  </header>
+
+  <section id="que-hace">
+    <div class="sec-head">
+      <p class="eyebrow">Qué hace</p>
+      <h2>El trabajo no es dibujar la rejilla. Es cubrir el hueco.</h2>
+      <p class="lede">Montar el cuadrante es tedioso. Cubrir una falta a las siete de la mañana es una carrera. MedBoard hace las dos, pero está pensada para la segunda.</p>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <span class="tag">Mínimos</span>
+        <h3>Avisa antes de que te quedes corta</h3>
+        <p>Tú defines cuánta gente tiene que haber por turno y por equipo. Cualquier cambio que deje el día por debajo se rechaza en el momento, no cuando ya es tarde.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Suplencias</span>
+        <h3>Quién puede cubrirlo, en orden</h3>
+        <p>Detecta las faltas sin cubrir y ordena tu agenda de suplentes por equipo y por cómo te funcionó la última vez.</p>
+      </article>
+      <article class="card">
+        <span class="tag">WhatsApp</span>
+        <h3>El mensaje ya escrito</h3>
+        <p>Abre tu WhatsApp con el texto hecho: a quién, qué días, qué turno y dónde. Tú solo le das a enviar.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Papeleo</span>
+        <h3>El PDF del tablón y la hoja de Administración</h3>
+        <p>El cuadrante del mes para imprimir, la hoja con los DNI para tramitar los contratos y el calendario en <code>.ics</code> para tu móvil.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Festivos</span>
+        <h3>Los de tu comunidad, no los de Madrid</h3>
+        <p>Calcula los festivos de las 19 comunidades y ciudades autónomas, Semana Santa incluida. Si tu centro tiene una fiesta local, la añades tú.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Tu centro</span>
+        <h3>Turnos y equipos a tu medida</h3>
+        <p>Mañana, tarde y noche si la tienes. Adultos, pediatría o como se llame en tu centro. Nada viene impuesto.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="privacidad">
+    <div class="privacy">
+      <div class="sec-head" style="margin-bottom:0">
+        <p class="eyebrow">Privacidad</p>
+        <h2>Los datos no salen de tu dispositivo.</h2>
+        <p class="lede">No es una promesa comercial: es que no hay a dónde mandarlos. MedBoard no tiene servidor.</p>
+      </div>
+      <ul class="facts">
+        <li><b>Sin servidor y sin cuenta</b><span>No hay registro, ni inicio de sesión, ni nada que viaje por la red.</span></li>
+        <li><b>Sin analítica ni publicidad</b><span>Cero librerías de terceros ejecutándose. La app no sabe quién eres.</span></li>
+        <li><b>Nunca pregunta el motivo de una falta</b><span>Solo apunta que alguien no está. Así no trata datos de salud.</span></li>
+        <li><b>Copia de seguridad cifrada</b><span>AES-GCM de 256 bits con la clave derivada de tu contraseña (PBKDF2, 310.000 iteraciones).</span></li>
+      </ul>
+      <p style="font-size:.875rem;color:var(--muted)">
+        Lo único que sale es lo que tú compartes a mano: un PDF, un calendario o una copia. Si guardas datos de
+        suplentes, avísales de que lo haces y bórralos cuando te lo pidan.
+      </p>
+    </div>
+  </section>
+
+  <section id="instalar">
+    <div class="sec-head">
+      <p class="eyebrow">Instalar</p>
+      <h2>Tres formas, ninguna complicada.</h2>
+      <p class="lede">Es la misma aplicación en los tres sitios. Elige dónde la quieres.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Cómo instalar">
+      <button class="tab" role="tab" id="tab-android" aria-controls="panel-android" aria-selected="true">Android</button>
+      <button class="tab" role="tab" id="tab-ios" aria-controls="panel-ios" aria-selected="false" tabindex="-1">iPhone y iPad</button>
+      <button class="tab" role="tab" id="tab-pc" aria-controls="panel-pc" aria-selected="false" tabindex="-1">Ordenador</button>
+    </div>
+
+    <div class="panel" id="panel-android" role="tabpanel" aria-labelledby="tab-android">
+      <div class="panel-top">
+        <h3>Android · aplicación completa (APK)</h3>
+        <p style="color:var(--muted);font-size:.9375rem">La versión con todo: funciona sin conexión y comparte los PDF con el resto de tus apps.</p>
+      </div>
+      <ol class="steps">
+        <li><p><b>Descarga el archivo APK</b><small>Pesa unos 8 MB. Tu navegador te avisará de que es un archivo de instalación: es normal.</small></p></li>
+        <li><p><b>Permite instalarlo</b><small>Android preguntará si confías en esta fuente. Acepta «Permitir desde esta fuente» y vuelve atrás.</small></p></li>
+        <li><p><b>Abre el archivo descargado y pulsa Instalar</b><small>Si Play Protect avisa, elige «Instalar de todos modos»: la app no está publicada en Google Play todavía.</small></p></li>
+        <li><p><b>Ábrela y da de alta tu centro</b><small>Nombre del centro, comunidad, turnos, mínimos y tu equipo. Se cambia todo después.</small></p></li>
+      </ol>
+      <div style="margin-top:22px" id="apk-slot"></div>
+      <p class="req"><span>Android 7.0 o superior</span><span>~8 MB</span><span>No necesita permisos de contactos ni de ubicación</span></p>
+    </div>
+
+    <div class="panel" id="panel-ios" role="tabpanel" aria-labelledby="tab-ios" hidden>
+      <div class="panel-top">
+        <h3>iPhone y iPad · desde Safari</h3>
+        <p style="color:var(--muted);font-size:.9375rem">En iPhone se instala desde el navegador, sin App Store. Queda como una app más en la pantalla de inicio y funciona sin conexión.</p>
+      </div>
+      <ol class="steps">
+        <li><p><b>Abre la aplicación en Safari</b><small>Tiene que ser Safari. Desde Chrome en iPhone no aparece la opción de instalar.</small></p></li>
+        <li><p><b>Pulsa el botón Compartir</b><small>El cuadrado con la flecha hacia arriba, abajo en el centro de la pantalla.</small></p></li>
+        <li><p><b>Elige «Añadir a pantalla de inicio»</b><small>Baja un poco en la lista de opciones. Luego pulsa «Añadir» arriba a la derecha.</small></p></li>
+        <li><p><b>Ábrela desde el icono nuevo</b><small>Se abre a pantalla completa, sin barra del navegador.</small></p></li>
+      </ol>
+      <div style="margin-top:22px" id="ios-slot"></div>
+      <p class="req"><span>iOS 16.4 o superior</span><span>Sin App Store</span><span>Funciona sin conexión una vez abierta</span></p>
+    </div>
+
+    <div class="panel" id="panel-pc" role="tabpanel" aria-labelledby="tab-pc" hidden>
+      <div class="panel-top">
+        <h3>Ordenador · Chrome, Edge o Safari</h3>
+        <p style="color:var(--muted);font-size:.9375rem">Cómoda para montar el cuadrante del mes con teclado y pantalla grande, y para imprimir.</p>
+      </div>
+      <ol class="steps">
+        <li><p><b>Abre la aplicación en el navegador</b><small>Puedes usarla así, sin instalar nada.</small></p></li>
+        <li><p><b>Pulsa el icono de instalar en la barra de direcciones</b><small>En Chrome y Edge, a la derecha del todo. También está en el menú ⋮ → «Instalar MedBoard».</small></p></li>
+        <li><p><b>Confirma</b><small>Se abre en su propia ventana y aparece en el escritorio o en el menú de inicio.</small></p></li>
+      </ol>
+      <div style="margin-top:22px" id="pc-slot"></div>
+      <p class="req"><span>Windows, macOS o Linux</span><span>Los datos se quedan en ese navegador</span><span>Haz copia antes de cambiar de equipo</span></p>
+    </div>
+  </section>
+
+  <section id="limites">
+    <div class="sec-head">
+      <p class="eyebrow">Antes de usarla</p>
+      <h2>Lo que no hace, a propósito.</h2>
+    </div>
+    <ul class="limits">
+      <li><span aria-hidden="true">—</span><div><b>No es un producto sanitario.</b><p>Organiza turnos; no toma decisiones clínicas. La planilla oficial sigue siendo la de Supervisión o Dirección.</p></div></li>
+      <li><span aria-hidden="true">—</span><div><b>No sincroniza entre dispositivos.</b><p>Un centro, un dispositivo. Para cambiar de móvil se usa la copia cifrada.</p></div></li>
+      <li><span aria-hidden="true">—</span><div><b>No pregunta por qué falta alguien.</b><p>Y no conviene escribirlo en ningún campo: es lo que mantiene la app fuera del terreno de los datos de salud.</p></div></li>
+      <li><span aria-hidden="true">—</span><div><b>Los festivos son una propuesta.</b><p>El calendario laboral lo publica cada año tu comunidad. La app lo calcula y te deja corregirlo.</p></div></li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong style="color:var(--ink)">MedBoard</strong> · Hecho desde dentro de un centro de salud, para quien monta el cuadrante.</p>
+    <div class="foot-links" id="foot-links"></div>
+    <p style="font-size:.8125rem">Se ofrece tal cual, gratis y sin garantía. Quien la usa es responsable de comprobar que su cuadrante es correcto.</p>
+  </footer>
+
+</main>
+
+<script>
+/* ------------------------------------------------------------------
+   Enlaces. Rellena estos tres y la página se actualiza sola.
+   Mientras estén vacíos, el botón que les corresponde sale como pendiente.
+------------------------------------------------------------------ */
+const ENLACES = {
+  demo:   "https://medboard-app-xi.vercel.app",
+  github: "",
+  apk:    ""
+};
+
+/* ---------- botones que dependen de los enlaces ---------- */
+function boton(url, texto, clase, pendiente) {
+  if (url) return '<a class="btn ' + clase + '" href="' + url + '" target="_blank" rel="noopener">' + texto + '</a>';
+  return '<span class="btn ' + clase + '" aria-disabled="true">' + texto + '</span>' +
+         '<p class="pending" style="margin-top:8px">' + pendiente + '</p>';
+}
+
+document.getElementById("apk-slot").innerHTML =
+  boton(ENLACES.apk, "Descargar APK", "btn-primary", "Enlace de descarga pendiente de publicar.");
+document.getElementById("ios-slot").innerHTML =
+  boton(ENLACES.demo, "Abrir en Safari", "btn-primary", "Dirección pendiente de publicar.");
+document.getElementById("pc-slot").innerHTML =
+  boton(ENLACES.demo, "Abrir en el navegador", "btn-primary", "Dirección pendiente de publicar.");
+
+const demoCta = document.getElementById("cta-demo");
+if (ENLACES.demo) { demoCta.href = ENLACES.demo; demoCta.target = "_blank"; demoCta.rel = "noopener"; }
+
+const enlacesPie = [
+  ENLACES.github ? '<a href="' + ENLACES.github + '" target="_blank" rel="noopener">Código en GitHub</a>' : '<span>Código en GitHub (pendiente)</span>',
+  ENLACES.demo ? '<a href="' + ENLACES.demo + '" target="_blank" rel="noopener">Probar la aplicación</a>' : '<span>Aplicación (pendiente)</span>',
+  '<a href="#privacidad">Privacidad</a>'
+];
+document.getElementById("foot-links").innerHTML = enlacesPie.join("");
+
+/* ---------- pestañas de instalación ---------- */
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+function seleccionar(tab) {
+  tabs.forEach(t => {
+    const activo = t === tab;
+    t.setAttribute("aria-selected", activo ? "true" : "false");
+    t.tabIndex = activo ? 0 : -1;
+    document.getElementById(t.getAttribute("aria-controls")).hidden = !activo;
+  });
+}
+tabs.forEach((tab, i) => {
+  tab.addEventListener("click", () => seleccionar(tab));
+  tab.addEventListener("keydown", e => {
+    const paso = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!paso) return;
+    e.preventDefault();
+    const siguiente = tabs[(i + paso + tabs.length) % tabs.length];
+    siguiente.focus();
+    seleccionar(siguiente);
+  });
+});
+
+/* ------------------------------------------------------------------
+   Cuadrante de demostración.
+   Las mismas reglas que el motor de la app: una falta nunca se bloquea,
+   pero un cambio de turno que deje la mañana por debajo del mínimo, sí.
+------------------------------------------------------------------ */
+const MINIMO = 3;
+const DIAS = [5, 6, 7, 8, 9, 13, 14, 15];
+const EQUIPO = [
+  { nombre: "Ana",    turnos: ["M","M","M","M","M","M","M","M"] },
+  { nombre: "Berta",  turnos: ["M","M","M","M","M","M","M","M"] },
+  { nombre: "Clara",  turnos: ["M","M","AUS","M","M","M","M","M"] },
+  { nombre: "Diana",  turnos: ["M","M","M","M","M","M","M","M"] },
+  { nombre: "Eva",    turnos: ["T","T","T","T","T","T","T","T"] }
+];
+const SIGUIENTE = { M: "T", T: "AUS", AUS: "M" };
+const NOMBRE = { M: "mañana", T: "tarde", AUS: "falta" };
+const mensaje = document.getElementById("board-msg");
+
+const cabecera = document.getElementById("grid-head");
+DIAS.forEach(d => {
+  const th = document.createElement("th");
+  th.scope = "col";
+  th.textContent = d;
+  cabecera.appendChild(th);
+});
+
+const cuerpo = document.getElementById("grid-body");
+EQUIPO.forEach((persona, fila) => {
+  const tr = document.createElement("tr");
+  const th = document.createElement("th");
+  th.scope = "row";
+  th.textContent = persona.nombre;
+  tr.appendChild(th);
+  persona.turnos.forEach((codigo, col) => {
+    const td = document.createElement("td");
+    const b = document.createElement("button");
+    b.className = "cell";
+    b.dataset.fila = fila;
+    b.dataset.col = col;
+    b.addEventListener("click", () => tocar(fila, col));
+    td.appendChild(b);
+    tr.appendChild(td);
+  });
+  cuerpo.appendChild(tr);
+});
+
+const pie = document.getElementById("grid-foot");
+DIAS.forEach(() => {
+  const td = document.createElement("td");
+  const div = document.createElement("div");
+  div.className = "count";
+  td.appendChild(div);
+  pie.appendChild(td);
+});
+
+const mananas = col => EQUIPO.reduce((n, p) => n + (p.turnos[col] === "M" ? 1 : 0), 0);
+
+function tocar(fila, col) {
+  const actual = EQUIPO[fila].turnos[col];
+  const nuevo = SIGUIENTE[actual];
+  const persona = EQUIPO[fila].nombre;
+
+  // Una falta es un hecho: nunca se bloquea.
+  if (nuevo !== "AUS" && actual === "M" && mananas(col) - 1 < MINIMO) {
+    avisar("bad", "No se puede: la mañana del " + DIAS[col] + " se quedaría en " + (mananas(col) - 1) + " de " + MINIMO + ".");
+    return;
+  }
+  EQUIPO[fila].turnos[col] = nuevo;
+  pintar();
+  if (nuevo === "AUS") {
+    const quedan = mananas(col);
+    avisar(quedan < MINIMO ? "warn" : "", quedan < MINIMO
+      ? persona + " falta el " + DIAS[col] + ". Día en crítico: faltan " + (MINIMO - quedan) + " por la mañana. Toca buscar suplente."
+      : persona + " falta el " + DIAS[col] + ". El día sigue cubierto.");
+  } else {
+    avisar("", persona + ", " + DIAS[col] + " de octubre: " + NOMBRE[nuevo] + ".");
+  }
+}
+
+function avisar(tono, texto) {
+  mensaje.dataset.tone = tono;
+  mensaje.textContent = texto;
+}
+
+function pintar() {
+  document.querySelectorAll(".cell").forEach(b => {
+    const codigo = EQUIPO[b.dataset.fila].turnos[b.dataset.col];
+    b.dataset.code = codigo;
+    b.textContent = codigo === "AUS" ? "Falta" : codigo;
+    b.setAttribute("aria-label",
+      EQUIPO[b.dataset.fila].nombre + ", " + DIAS[b.dataset.col] + " de octubre: " + NOMBRE[codigo] + ". Tocar para cambiar.");
+  });
+  pie.querySelectorAll(".count").forEach((div, col) => {
+    const n = mananas(col);
+    div.textContent = n + "/" + MINIMO;
+    div.classList.toggle("bad", n < MINIMO);
+    div.setAttribute("aria-label", "Mañana del " + DIAS[col] + ": " + n + " de " + MINIMO + " necesarias");
+  });
+}
+
+pintar();
+</script>
+
+</body>
+</html>

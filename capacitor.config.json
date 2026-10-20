@@ -1,0 +1,13 @@
+{
+  "appId": "com.alvarocollado.medboard",
+  "appName": "MedBoard",
+  "webDir": "out",
+  "android": {
+    "webContentsDebuggingEnabled": false,
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  }
+}

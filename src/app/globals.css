@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-hyper);
+  --font-mono: var(--font-geist-mono);
+
+  /* Neutros cálidos (corcho) + verde azulado del fonendo del logotipo. */
+  --color-ink: #1d2733;
+  --color-muted: #5a6370;
+  --color-line: #e7e0d5;
+  --color-canvas: #f6f2ec;
+  --color-surface: #ffffff;
+  --color-brand: #0f766e;
+  --color-brand-deep: #0a5650;
+  --color-brand-soft: #e2f3f0;
+  --color-cork: #c48a52;
+  --color-cork-soft: #f4e7d6;
+
+  --color-shift-m: #e3effa;
+  --color-shift-m-ink: #0b4a75;
+  --color-shift-t: #ece8fb;
+  --color-shift-t-ink: #3d2f8f;
+  --color-shift-n: #e6e9ee;
+  --color-shift-n-ink: #27313f;
+  --color-shift-x: #e9f4e4;
+  --color-shift-x-ink: #2f5a22;
+  --color-salmon: #e8604f;
+  --color-salmon-soft: #fde5df;
+  --color-salmon-ink: #8c2d1c;
+  --color-sub: #dcf4e9;
+  --color-sub-ink: #0b5e3d;
+  --color-ped: #c2366a;
+  --color-ped-soft: #fdeef4;
+  --color-critical: #b71c1c;
+  --color-critical-soft: #fdecec;
+  --color-wa: #0d7a3f;
+  --color-wa-deep: #07552b;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-feature-settings: "tnum" 1;
+}
+
+.locked-stripes {
+  background-image: repeating-linear-gradient(135deg, #f1ece4 0 4px, #e8e1d6 4px 8px);
+}
+
+@layer components {
+  /* Botón con relieve: se "hunde" al pulsar. */
+  .btn-3d {
+    --depth: var(--color-line);
+    position: relative;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 2px 0 var(--depth),
+      0 6px 12px -8px rgb(29 39 51 / 0.3);
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background-color 150ms ease,
+      filter 150ms ease;
+  }
+  @media (hover: hover) {
+    .btn-3d:hover:not(:disabled) {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+  }
+  .btn-3d:active:not(:disabled) {
+    transform: translateY(2px) scale(0.98);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 0 0 var(--depth),
+      0 2px 6px -4px rgb(29 39 51 / 0.3);
+  }
+  .btn-3d:disabled {
+    box-shadow: none;
+  }
+
+  .card-3d {
+    box-shadow:
+      0 0 0 1px rgb(29 39 51 / 0.05),
+      0 1px 2px rgb(29 39 51 / 0.05),
+      0 10px 24px -18px rgb(29 39 51 / 0.35);
+  }
+  /* Casilla del calendario: se inclina hacia el dedo al pulsar. */
+  .tilt {
+    transition: transform 140ms ease;
+  }
+  .tilt:active {
+    transform: perspective(300px) rotateX(10deg) scale(0.94);
+  }
+
+  .sheet-in {
+    animation: sheet-in 420ms cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
+    transform-origin: 50% 100%;
+  }
+  .fade-in {
+    animation: fade-in 220ms ease-out both;
+  }
+  .rise-in {
+    animation: rise-in 360ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  }
+  .pop-in {
+    animation: pop-in 260ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) translateY(48px) rotateX(16deg) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+/* Intro: tablón de corcho. El logo gira en 3D y se pierde; después la suplente
+   cambia su sitio con la enfermera que falta (un intercambio de uno por otro). */
+.cork-board {
+  background:
+    radial-gradient(circle at 20% 30%, rgb(90 50 20 / 0.28) 1px, transparent 1.6px) 0 0 / 9px 9px,
+    radial-gradient(circle at 70% 60%, rgb(255 235 200 / 0.3) 1px, transparent 1.7px) 0 0 / 13px 13px,
+    radial-gradient(circle at 40% 80%, rgb(80 40 10 / 0.22) 1.3px, transparent 2.2px) 0 0 / 17px 17px,
+    radial-gradient(circle at 50% 40%, #d39d64, var(--color-cork) 70%);
+  box-shadow: inset 0 0 0 10px #7a4b25, inset 0 0 0 13px #5c3518, inset 0 0 60px rgb(0 0 0 / 0.35);
+}
+@keyframes logo-flip {
+  0% {
+    opacity: 0;
+    transform: perspective(700px) rotateY(-110deg) rotateX(18deg) scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(700px) rotateY(10deg) scale(1.06);
+  }
+  100% {
+    transform: perspective(700px) rotateY(0) scale(1);
+  }
+}
+@keyframes logo-away {
+  to {
+    opacity: 0;
+    transform: perspective(700px) rotateY(95deg) translateZ(-120px) scale(0.5);
+  }
+}
+@keyframes note-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.25) rotate(-10deg);
+  }
+}
+@keyframes swap-a {
+  50% {
+    transform: translate3d(96px, -22px, -110px) rotateY(-35deg);
+  }
+  to {
+    transform: translate3d(192px, 6px, -60px) scale(0.84);
+    opacity: 0.5;
+  }
+}
+@keyframes swap-b {
+  50% {
+    transform: translate3d(-96px, -34px, 110px) rotateY(35deg) scale(1.1);
+  }
+  to {
+    transform: translate3d(-192px, 0, 20px) scale(1.06);
+  }
+}
+@keyframes swap-arrows {
+  from {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: rotate(360deg) scale(1.4);
+  }
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(2.2) rotate(-18deg);
+  }
+  to {
+    transform: rotate(-8deg);
+  }
+}
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.logo-flip {
+  animation: logo-flip 900ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.intro-logo {
+  animation:
+    logo-flip 900ms cubic-bezier(0.2, 0.9, 0.3, 1) both,
+    logo-away 420ms 950ms ease-in forwards;
+}
+.note-drop {
+  animation: note-drop 380ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+.swap-a {
+  transform-style: preserve-3d;
+  animation: swap-a 900ms 1900ms cubic-bezier(0.5, 0, 0.3, 1) forwards;
+}
+.swap-b {
+  transform-style: preserve-3d;
+  animation: swap-b 900ms 1900ms cubic-bezier(0.5, 0, 0.3, 1) forwards;
+}
+.swap-arrows {
+  animation: swap-arrows 900ms 1900ms ease-in-out both;
+}
+.stamp {
+  animation: stamp 320ms 2850ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.intro-out {
+  animation: intro-out 380ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MedBoard</string>
+    <string name="title_activity_main">MedBoard</string>
+    <string name="package_name">com.alvarocollado.medboard</string>
+    <string name="custom_url_scheme">com.alvarocollado.medboard</string>
+</resources>
